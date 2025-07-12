@@ -21,6 +21,8 @@ public class RouterRest {
                 .andRoute(PUT("/box/{id}"), handler::updateBox)
                 .andRoute(PATCH("/box/{id}"), handler::updateBoxName)
                 .andRoute(DELETE("/box/{id}"), handler::deleteBox)
+                .andRoute(POST("/api/boxes/{id}/movements/uplodad"), handler::boxMovementsBatch)
                 .andRoute(GET("/box"), handler::listBox);
+
     }
 }

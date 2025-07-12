@@ -76,4 +76,7 @@ public class Handler {
                 .body(boxUseCase.listBox(), Box.class);
     }
 
+    public Mono<ServerResponse> boxMovementsBatch(ServerRequest serverRequest) {
+       String id = serverRequest.pathVariable("id");
+    }
 }
