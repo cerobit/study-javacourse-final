@@ -1,7 +1,7 @@
 package co.com.bancolombia.mongo.helper;
 
-import co.com.bancolombia.mongo.MongoDBRepository;
-import co.com.bancolombia.mongo.MongoRepositoryAdapter;
+import co.com.bancolombia.mongo.MongoDBBoxRepository;
+import co.com.bancolombia.mongo.BoxRepositoryAdapter;
 import co.com.bancolombia.model.box.Box;
 import co.com.bancolombia.mongo.BoxData;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,12 +21,12 @@ import static org.mockito.Mockito.when;
 class AdapterOperationsTest {
 
     @Mock
-    private MongoDBRepository repository;
+    private MongoDBBoxRepository repository;
 
     @Mock
     private ObjectMapper objectMapper;
 
-    private MongoRepositoryAdapter adapter;
+    private BoxRepositoryAdapter adapter;
 
     private Box entity;
     private Flux<Box> entities;
@@ -43,7 +43,7 @@ class AdapterOperationsTest {
         when(objectMapper.map(any(Box.class), eq(BoxData.class))).thenReturn(boxData);
         when(objectMapper.map(any(BoxData.class), eq(Box.class))).thenReturn(entity);
 
-        adapter = new MongoRepositoryAdapter(repository, objectMapper);
+        adapter = new BoxRepositoryAdapter(repository, objectMapper);
     }
 
     @Test

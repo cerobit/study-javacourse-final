@@ -3,6 +3,7 @@ package co.com.bancolombia.api.handlers;
 import co.com.bancolombia.api.model.UpdateBoxNameRequest;
 import co.com.bancolombia.model.box.Box;
 import co.com.bancolombia.usecase.getbox.BoxUseCase;
+import co.com.bancolombia.usecase.getbox.UploadMovementsUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Mono;
 public class Handler {
 
     private final BoxUseCase boxUseCase;
+    private final UploadMovementsUseCase uploadMovementsUseCase;
 
     public Mono<ServerResponse> getBoxByID(ServerRequest request) {
         String id = request.pathVariable("id");
@@ -78,5 +80,6 @@ public class Handler {
 
     public Mono<ServerResponse> boxMovementsBatch(ServerRequest serverRequest) {
        String id = serverRequest.pathVariable("id");
+       return  Mono.just(ServerResponse.ok().build().block());
     }
 }

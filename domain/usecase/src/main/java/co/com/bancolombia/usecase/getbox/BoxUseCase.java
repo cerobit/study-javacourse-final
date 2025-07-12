@@ -60,27 +60,27 @@ public class BoxUseCase {
         });
     }
 
-public Mono<Box> CloseBoxByID(String id) {
-    return boxRepository.getBoxByID(id)
-        .flatMap(box -> {
-            if (box.getStatus() != co.com.bancolombia.model.boxstatus.BoxStatus.OPENED) {
-                return Mono.error(new IllegalStateException("La caja no está abierta"));
-            }
-            box.setClosingAmount(box.getCurrentBalance());
-            box.setClosedAt(java.time.LocalDateTime.now());
-            box.setStatus(co.com.bancolombia.model.boxstatus.BoxStatus.CLOSED);
-            return boxRepository.updateBox(id, box)
-                    .flatMap(updatedBox -> {
-                        BoxEvent event = new BoxEvent("CLOSE", "SUCCESS", updatedBox);
-                        return eventsGateway.emit(event, BoxEventType.CLOSE).thenReturn(updatedBox);
-                    });
-        })
-        .onErrorResume(e -> {
-            BoxEvent event = new BoxEvent("CLOSE", "FAILED", new Box(id, null, null, null, null, null, null, null));
-            return eventsGateway.emit(event, BoxEventType.CLOSE)
-                    .then(Mono.error(e));
-        });
-}
+    public Mono<Box> CloseBoxByID(String id) {
+        return boxRepository.getBoxByID(id)
+                .flatMap(box -> {
+                    if (box.getStatus() != co.com.bancolombia.model.boxstatus.BoxStatus.OPENED) {
+                        return Mono.error(new IllegalStateException("La caja no está abierta"));
+                    }
+                    box.setClosingAmount(box.getCurrentBalance());
+                    box.setClosedAt(java.time.LocalDateTime.now());
+                    box.setStatus(co.com.bancolombia.model.boxstatus.BoxStatus.CLOSED);
+                    return boxRepository.updateBox(id, box)
+                            .flatMap(updatedBox -> {
+                                BoxEvent event = new BoxEvent("CLOSE", "SUCCESS", updatedBox);
+                                return eventsGateway.emit(event, BoxEventType.CLOSE).thenReturn(updatedBox);
+                            });
+                })
+                .onErrorResume(e -> {
+                    BoxEvent event = new BoxEvent("CLOSE", "FAILED", new Box(id, null, null, null, null, null, null, null));
+                    return eventsGateway.emit(event, BoxEventType.CLOSE)
+                            .then(Mono.error(e));
+                });
+    }
 
     public Mono<Box> reOpenBox(String id) {
         return boxRepository.getBoxByID(id)
