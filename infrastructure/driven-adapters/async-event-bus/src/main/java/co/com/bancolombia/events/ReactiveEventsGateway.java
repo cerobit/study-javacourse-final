@@ -3,6 +3,7 @@ package co.com.bancolombia.events;
 import co.com.bancolombia.model.event.BoxEvent;
 import co.com.bancolombia.model.event.BoxEventType;
 import co.com.bancolombia.model.event.BoxEventUpdate;
+import co.com.bancolombia.model.event.MovementsUploadEvent;
 import co.com.bancolombia.model.events.gateways.EventsGateway;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -33,5 +34,11 @@ public class ReactiveEventsGateway implements EventsGateway {
     public Mono<Void> emitEventUpdate(BoxEventUpdate eventUpdate, BoxEventType eventType) {
         log.log(Level.INFO, "Sending domain event: {0}: {1}", new String[]{eventType.getValue(), eventUpdate.toString()});
         return from(domainEventBus.emit(new DomainEvent<>(eventType.getValue(), UUID.randomUUID().toString(), eventUpdate)));
+    }
+
+    @Override
+    public Mono<Void> emitMovementsUpload(MovementsUploadEvent eventUploadFile, BoxEventType eventType) {
+        log.log(Level.INFO, "Sending domain Event {0} ", eventUploadFile.toString());
+        return from(domainEventBus.emit(new DomainEvent<>(eventType.getValue(), UUID.randomUUID().toString(), eventUploadFile)));
     }
 }

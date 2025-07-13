@@ -8,6 +8,7 @@ public enum BoxEventType {
     DELETE("box.delete"),
     UPDATE("box.update"),
     UPDATE_NAME("box.updatename"),
+    FILE_MOVEMENTS_RECIVED("movements.file.received"),
     BOX("box.box");
 
     private final String value;

@@ -3,11 +3,15 @@ package co.com.bancolombia.api.handlers;
 import co.com.bancolombia.api.model.MovementRequest;
 import co.com.bancolombia.api.model.UpdateBoxNameRequest;
 import co.com.bancolombia.model.box.Box;
+import co.com.bancolombia.model.event.BoxEventType;
+import co.com.bancolombia.model.event.MovementsUploadEvent;
+import co.com.bancolombia.model.events.gateways.EventsGateway;
 import co.com.bancolombia.model.movement.Movement;
 import co.com.bancolombia.model.movement.MovementType;
 import co.com.bancolombia.usecase.getbox.BoxUseCase;
 import co.com.bancolombia.usecase.getbox.UploadMovementsUseCase;
 import lombok.RequiredArgsConstructor;
+import org.reactivecommons.async.api.handlers.EventHandler;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
@@ -21,6 +25,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @RequiredArgsConstructor
@@ -28,6 +33,7 @@ public class Handler {
 
     private final BoxUseCase boxUseCase;
     private final UploadMovementsUseCase uploadMovementsUseCase;
+    private final EventsGateway eventsGateway;
 
     public Mono<ServerResponse> getBoxByID(ServerRequest request) {
         String id = request.pathVariable("id");
@@ -89,44 +95,59 @@ public class Handler {
                 .body(boxUseCase.listBox(), Box.class);
     }
 
+
     public Mono<ServerResponse> boxMovementsBatch(ServerRequest serverRequest) {
-        String id = serverRequest.pathVariable("id");
-        // 1. Get the multipart request and extract the file
+        String boxId = serverRequest.pathVariable("id");
+
+        // Thread-safe counters for success and failure
+        AtomicInteger successCount = new AtomicInteger(0);
+        AtomicInteger failureCount = new AtomicInteger(0);
+        AtomicInteger totalCount = new AtomicInteger(0);
+
+        MovementsUploadEvent movementsUploadEvent = new MovementsUploadEvent();
+        movementsUploadEvent.setBoxId(boxId);
+        movementsUploadEvent.setUploadedAt(LocalDateTime.now());
+        // Set uploadedBy as needed, e.g., from security context or request
+
         return serverRequest.multipartData()
                 .flatMap(parts -> {
-                    // Assuming the file part is named 'file' in the form
-                    // You might need to handle the case where 'file' part is missing
                     FilePart filePart = (FilePart) parts.toSingleValueMap().get("file");
                     if (filePart == null) {
                         return ServerResponse.badRequest().bodyValue("Missing 'file' part in multipart request.");
                     }
 
-                    // 2. Process the file content line by line reactively
-                    return filePart.content() // Get Flux<DataBuffer>
+                    return filePart.content()
                             .map(dataBuffer -> {
-                                // Convert DataBuffer to String
                                 byte[] bytes = new byte[dataBuffer.readableByteCount()];
                                 dataBuffer.read(bytes);
-                                DataBufferUtils.release(dataBuffer); // Release the buffer
+                                DataBufferUtils.release(dataBuffer);
                                 return new String(bytes, StandardCharsets.UTF_8);
                             })
-                            .flatMap(content -> {
-                                // Split content by lines, handling potential partial lines across DataBuffers
-                                // A more robust solution might buffer until a newline is found
-                                return Flux.fromArray(content.split("\\r?\\n"));
+                            .flatMap(content -> Flux.fromArray(content.split("\\r?\\n")))
+                            .filter(line -> !line.trim().isEmpty())
+                            .flatMap(line -> {
+                                totalCount.incrementAndGet(); // Count total lines
+
+                                return parseLineToMovementRequestReactive(line)
+                                        .flatMap(dto -> mapDtoToDomain(dto))
+                                        .flatMap(domainMovement -> uploadMovementsUseCase.saveMovement(domainMovement))
+                                        .doOnSuccess(saved -> successCount.incrementAndGet())
+                                        .doOnError(e -> {
+                                            failureCount.incrementAndGet();
+                                            System.err.println("Error processing line '" + line + "': " + e.getMessage());
+                                        })
+                                        .onErrorResume(e -> Mono.empty()); // skip error lines
                             })
-                            .filter(line -> !line.trim().isEmpty()) // Filter empty lines
-                            .flatMap( line ->
-                                parseLineToMovementRequestReactive(line)
-                                        .doOnNext(dto -> {
-                                            System.out.println("Processing line for Box " + id + ": " + dto);
-                                        })
-                                        .onErrorResume( e -> {
-                                            System.err.println("Skipping invalid line: '" + line + "' due to error: " + e.getMessage());
-                                            return Mono.empty();
-                                        })
-                                        )
-                            .then(Mono.just("File processing started for Box ID: " + id)); // Indicate start, actual processing might be async
+                            .then(Mono.defer(() -> {
+                                // After all lines processed, build event
+                                movementsUploadEvent.setTotal(totalCount.get());
+                                movementsUploadEvent.setSuccess(successCount.get());
+                                movementsUploadEvent.setFailed(failureCount.get());
+                                // Send or publish the event (replace with your event sending logic)
+
+                                return  eventsGateway.emitMovementsUpload(movementsUploadEvent, BoxEventType.FILE_MOVEMENTS_RECIVED)
+                                        .thenReturn("File processed for Box ID: " + boxId);
+                            }));
                 })
                 .flatMap(message -> ServerResponse.ok().bodyValue(message))
                 .onErrorResume(e -> {
@@ -134,6 +155,7 @@ public class Handler {
                     return ServerResponse.status(500).bodyValue("Error processing file: " + e.getMessage());
                 });
     }
+
 
     public Mono<MovementRequest> parseLineToMovementRequestReactive(String line) {
         return Mono.fromCallable(() -> {
@@ -174,17 +196,21 @@ public class Handler {
         });
     }
 
-    public Movement toDomain(MovementRequest movementRequest) {
-        Movement movement = new Movement();
-        movement.setMovementId(movementRequest.getMovementId());
-        movement.setBoxId(movementRequest.getBoxId());
-        movement.setDate(movementRequest.getDate());
-        movement.setType(movementRequest.getType());
-        movement.setAmount(movementRequest.getAmount());
-        movement.setCurrency(movementRequest.getCurrency());
-        movement.setDescription(movementRequest.getDescription());
-        return movement;
+    public Mono<Movement> mapDtoToDomain(MovementRequest dto) {
+        return Mono.fromCallable(() -> {
+            Movement movement = new Movement();
+            movement.setMovementId(dto.getMovementId());
+            movement.setBoxId(dto.getBoxId());
+            movement.setDate(dto.getDate());
+            movement.setType(dto.getType());
+            movement.setAmount(dto.getAmount());
+            movement.setCurrency(dto.getCurrency());
+            movement.setDescription(dto.getDescription());
+            return movement;
+        });
     }
+
+
 
 
 }

@@ -19,7 +19,6 @@ public class Movement {
    private BigDecimal amount;
    private String currency;
    private String description;
-
 }
 
 

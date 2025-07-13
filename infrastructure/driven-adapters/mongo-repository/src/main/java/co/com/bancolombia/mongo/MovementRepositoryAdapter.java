@@ -25,7 +25,10 @@ public class MovementRepositoryAdapter extends AdapterOperations<Movement, Movem
 
     @Override
     public Mono<Movement> putMovement(Movement movement) {
-        return null;
+        MovementData movementData = mapper.map(movement, MovementData.class);
+        // Save entity and map back to domain Movement
+        return repository.save(movementData)
+                .map(savedMovementData -> mapper.map(savedMovementData, Movement.class));
     }
 }
 
