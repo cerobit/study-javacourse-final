@@ -9,14 +9,11 @@ import java.time.LocalDateTime;
 import jakarta.validation.constraints.*;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MovementRequest {
+public class UploadMovementRequest {
     private String movementId;
     @NotBlank
     private String boxId;

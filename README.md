@@ -27,6 +27,12 @@ curl -X POST http://localhost:8080/api/boxes/BOX-001/movements/upload \
 -F "file=@test01.csv"
 ```
 
+```sh
+curl -X POST http://localhost:8080/api/boxes/BOX-001/movements/upload \
+-H "Content-Type: multipart/form-data" \
+-F "file=@main.gradle"
+```
+
 #List
 ```sh
 curl -X GET "http://localhost:8080/box" -H "Accept: application/json"
