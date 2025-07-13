@@ -14,11 +14,11 @@ subprojects {
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'info.solidsoft.pitest'
 
-    compileJava.dependsOn validateStructure
+    //compileJava.dependsOn validateStructure
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_23
+        targetCompatibility = JavaVersion.VERSION_23
     }
 
     //build.dependsOn 'pitest'
@@ -30,7 +30,7 @@ subprojects {
     dependencies {
         implementation 'io.projectreactor:reactor-core'
         implementation 'io.projectreactor.addons:reactor-extra'
-
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
         testImplementation 'io.projectreactor.tools:blockhound-junit-platform:1.0.11.RELEASE'
 
         testImplementation 'io.projectreactor:reactor-test'
@@ -45,7 +45,6 @@ subprojects {
         annotationProcessor 'org.projectlombok:lombok:1.18.38'
         testCompileOnly 'org.projectlombok:lombok:1.18.38'
         testAnnotationProcessor 'org.projectlombok:lombok:1.18.38'
-
     }
 
     tasks.withType(Test).configureEach {

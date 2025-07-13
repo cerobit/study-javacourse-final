@@ -26,3 +26,5 @@ include ':mongo-repository'
 project(':mongo-repository').projectDir = file('./infrastructure/driven-adapters/mongo-repository')
 include ':async-event-bus'
 project(':async-event-bus').projectDir = file('./infrastructure/driven-adapters/async-event-bus')
+include ':file-util'
+project(':file-util').projectDir = file('./infrastructure/helpers/file-util')

@@ -21,6 +21,12 @@ podman start  mongo
 podman start  rabbitmq-stack
 ```
 
+```sh
+curl -X POST http://localhost:8080/api/boxes/BOX-001/movements/upload \
+-H "Content-Type: multipart/form-data" \
+-F "file=@test01.csv"
+```
+
 #List
 ```sh
 curl -X GET "http://localhost:8080/box" -H "Accept: application/json"
@@ -30,7 +36,7 @@ curl -X GET "http://localhost:8080/box" -H "Accept: application/json"
 curl -X POST "http://localhost:8080/box" \
   -H "Content-Type: application/json" \
   -d '{
-    "id": "123",
+    "id": "BOX-001",
     "name": "Sample Box",
     "status": "OPENED",
     "openingAmount": 1000.00,
@@ -45,6 +51,7 @@ curl -X POST "http://localhost:8080/box" \
 curl -X POST "http://localhost:8080/box/close/123" \
   -H "Content-Type: application/json"
 ```
+
 
 #Reopen Box
 ```sh

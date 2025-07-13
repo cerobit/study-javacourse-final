@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder(toBuilder = true)
 @Data
 public class Movement {
@@ -20,3 +21,5 @@ public class Movement {
    private String description;
 
 }
+
+
