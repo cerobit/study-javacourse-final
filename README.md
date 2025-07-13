@@ -1,10 +1,9 @@
-# Proyecto Base Implementando Clean Architecture
+## Clean Archicture Study project 
+#### for this study project i used the following resources:
 
-# for this study project i used the following resources:
+### Podman and MongoDB and RabbitMQ
 
-# Podman and MongoDB and RabbitMQ
-
-## Run MongoDB with Podman
+### Run MongoDB with Podman
 
 ```sh
 podman  machine start
@@ -53,18 +52,18 @@ curl -X POST http://localhost:8080/api/boxes/BOX-001/movements/upload \
 -H "Content-Type: multipart/form-data" \
 -F "file=@test-files/testLargeFile.csv"
 ```
-# Result of tests
-## File 01 - Validation trigger by header data
+## Result of tests
+### File 01 - Validation trigger by header data
 ![File 01 processed report header as no valid but proccess the rest of the file ](readme-images/fileprocessed.png)
-## File 02 - Validation multiple records that aren't valid
+### File 02 - Validation multiple records that aren't valid
 ![File 02 With some validations triggered ](readme-images/fileprocessed-error-validation.png)
-## File 03 - Validation  triggered by file size
+### File 03 - Validation  triggered by file size
 ![File 03 large file validation ](readme-images/testlargefile.png)
-## Responses to Curls 
+### Responses to Curls 
 ![Response to curls ](readme-images/responses.png) 
-## Console logs and Event  
-![Console events and lgs ](readme-images/responses.png)
-## Database correct info persisted
+### Console logs and Event  
+![Console events and lgs ](readme-images/console-ouput-events.png)
+### Database correct info persisted
 ![Console events and lgs ](readme-images/databaserecords.png)
 
 #Optional clean start
@@ -74,20 +73,20 @@ curl -X POST http://localhost:8080/api/boxes/BOX-001/movements/upload \
 
 #Other previous excercises
 
-#List
+### List
 
 ```sh
 curl -X GET "http://localhost:8080/box" -H "Accept: application/json"
 ```
 
-#Close Box
+### Close Box
 
 ```sh
 curl -X POST "http://localhost:8080/box/close/123" \
   -H "Content-Type: application/json"
 ```
 
-#Reopen Box
+### Reopen Box
 
 ```sh
 curl -X POST "http://localhost:8080/box/reopen/123" \
@@ -108,18 +107,13 @@ curl -X PUT "http://localhost:8080/box/123" \
   -d '{"id":"123","name":"Updated Box","status":"CLOSED","openedAt":"2024-06-01T10:00:00Z","closedAt":"2024-06-02T18:00:00Z","closingAmount":1500,"currentBalance":0}'
 ```
 
-#Optional clean start
-#podman stop rabbitmq-stack
-#podman rm rabbitmq-stack
-#podman run --tls-verify=false -d --hostname my-rabbit --name rabbitmq-stack -p 5672:5672 -p 15672:15672 rabbitmq:
+### Optional clean start
+- podman stop rabbitmq-stack
+- podman rm rabbitmq-stack
+- podman run --tls-verify=false -d --hostname my-rabbit --name rabbitmq-stack -p 5672:5672 -p 15672:15672 rabbitmq:
 3-management
 
-## Antes de Iniciar
-
-Empezaremos por explicar los diferentes componentes del proyectos y partiremos de los componentes externos, continuando
-con los componentes core de negocio (dominio) y por último el inicio y configuración de la aplicación.
-
-Lee el
+## Project generated with 
 artículo [Clean Architecture — Aislando los detalles](https://medium.com/bancolombia-tech/clean-architecture-aislando-los-detalles-4f9530f35d7a)
 
 # Arquitectura
