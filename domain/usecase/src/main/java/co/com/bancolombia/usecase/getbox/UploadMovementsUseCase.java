@@ -10,11 +10,14 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UploadMovementsUseCase {
 
+
     private final BoxRepository boxRepository;
     private final MovementRepository moveMentRepository;
     private final EventsGateway eventsGateway;
 
     public Mono<Movement> saveMovement(Movement movement) {
-        return moveMentRepository.putMovement(movement);
+        return boxRepository.getBoxByID(movement.getBoxId())
+                .switchIfEmpty(Mono.error(new RuntimeException("Box does not exist, movement not saved")))
+                .flatMap(box -> moveMentRepository.putMovement(movement));
     }
 }

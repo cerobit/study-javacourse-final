@@ -39,7 +39,7 @@ curl -X POST http://localhost:8080/api/boxes/BOX-001/movements/upload \
 -F "file=@test-files/test01.csv"
 ```
 
-## Test File 03 ( Some records no valid )
+## Test File 02 ( Some records no valid )
 ```sh
 curl -X POST http://localhost:8080/api/boxes/BOX-001/movements/upload \
 -H "Content-Type: multipart/form-data" \
