@@ -1,0 +1,6 @@
+movementId,boxId,date,type,amount,currency,description
+1,BOX-001,2024-06-30T08:30:00,INCOME,150000,COP,Ingreso apertura
+2,BOX-001,2024-06-30T12:45:00,EXPENSE,20000,COP,Compra suministros
+3,BOX-001,2024-06-30T17:00:00,INCOME,50000,COP,Venta contado
+4,BOX-001,2024-06-30T18:30:00,EXPENSE,-10000,COP,Error monto negativo
+5,BOX-001,2024-06-30T20:00:00,INVALID,10000,COP,Error tipo inválido
